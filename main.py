@@ -3,6 +3,7 @@ import requests
 import os
 from urllib.parse import urlparse
 
+# Create a Pyrogram client
 api_id = "10471716"
 api_hash = "f8a1b21a13af154596e2ff5bed164860"
 bot_token = "6680585225:AAEXQVe8voeIvCJ6ebzVN8cGdi4hmzKkkq4"
@@ -49,8 +50,14 @@ def link_handler(client, message):
                     if chunk:
                         f.write(chunk)
 
-        # Upload the file to Telegram
-        message.reply_document(document=downloaded_file_path)
+        # Check file extension to determine whether it's a video or a document
+        _, file_extension = os.path.splitext(file_name)
+        if file_extension.lower() in ['.mp4', '.avi', '.mkv', '.mov']:
+            # Upload as a native video
+            message.reply_video(video=downloaded_file_path)
+        else:
+            # Upload as a document
+            message.reply_document(document=downloaded_file_path)
 
         # Remove the downloaded file from the local storage
         os.remove(downloaded_file_path)
