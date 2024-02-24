@@ -1,2 +1,2 @@
-pyrogram==1.7.1
+pyrogram==1.4.6
 wget==3.2
