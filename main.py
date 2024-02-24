@@ -23,13 +23,20 @@ def link_handler(client, message):
         # Download the file to the current working directory
         link = message.text
         file_name = link.split("/")[-1].split("?")[0]
-        downloaded_file = wget.download(link, out=file_name)
+        downloaded_file_path = os.path.join(os.getcwd(), file_name)
+
+        with requests.get(link, stream=True) as r:
+            r.raise_for_status()
+            with open(downloaded_file_path, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
 
         # Upload the file to Telegram
-        message.reply_document(document=downloaded_file)
+        message.reply_document(document=downloaded_file_path)
 
         # Remove the downloaded file from the local storage
-        os.remove(downloaded_file)
+        os.remove(downloaded_file_path)
 
     except Exception as e:
         # Handle errors
