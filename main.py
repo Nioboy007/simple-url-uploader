@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-import wget
+import requests  # Import the requests library
 import os
 
 # Create a Pyrogram client
