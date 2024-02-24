@@ -20,9 +20,10 @@ def start_command(client, message):
 @app.on_message(filters.text & filters.regex(r'http[s]?://[^\s]+'))
 def link_handler(client, message):
     try:
-        # Download the file
+        # Download the file to the current working directory
         link = message.text
-        downloaded_file = wget.download(link)
+        file_name = link.split("/")[-1].split("?")[0]
+        downloaded_file = wget.download(link, out=file_name)
 
         # Upload the file to Telegram
         message.reply_document(document=downloaded_file)
