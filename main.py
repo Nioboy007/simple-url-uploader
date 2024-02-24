@@ -2,12 +2,12 @@ from pyrogram import Client, filters
 import requests
 import os
 from urllib.parse import urlparse
-from moviepy.editor import VideoFileClip
+import subprocess
 
+# Create a Pyrogram client
 api_id = "10471716"
 api_hash = "f8a1b21a13af154596e2ff5bed164860"
 bot_token = "6680585225:AAEXQVe8voeIvCJ6ebzVN8cGdi4hmzKkkq4"
-
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 
@@ -53,16 +53,21 @@ def link_handler(client, message):
         # Check file extension to determine whether it's a video or a document
         _, file_extension = os.path.splitext(file_name)
         if file_extension.lower() in ['.mp4', '.avi', '.mkv', '.mov']:
-            # Extract video metadata using moviepy
-            video_clip = VideoFileClip(downloaded_file_path)
-            duration = int(video_clip.duration)
+            # Use ffmpeg to get video duration and generate thumbnail
+            duration_command = ['ffmpeg', '-i', downloaded_file_path, '-hide_banner', '-loglevel', 'panic', '-show_entries', 'format=duration', '-sexagesimal', '-of', 'csv=p=0']
             thumbnail_path = f"{os.getcwd()}/thumbnail.jpg"
-            video_clip.save_frame(thumbnail_path, t=duration / 2)  # Save thumbnail at the middle of the video
+            thumbnail_command = ['ffmpeg', '-i', downloaded_file_path, '-ss', '00:00:05', '-vframes', '1', thumbnail_path]
+
+            # Extract duration
+            duration = subprocess.check_output(duration_command).decode('utf-8').strip()
+
+            # Generate thumbnail
+            subprocess.run(thumbnail_command)
 
             # Upload video with metadata
             message.reply_video(
                 video=downloaded_file_path,
-                duration=duration,
+                duration=int(float(duration)),
                 thumb=thumbnail_path
             )
 
