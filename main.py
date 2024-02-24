@@ -2,8 +2,8 @@ from pyrogram import Client, filters
 import requests
 import os
 from urllib.parse import urlparse
+from moviepy.editor import VideoFileClip
 
-# Create a Pyrogram client
 api_id = "10471716"
 api_hash = "f8a1b21a13af154596e2ff5bed164860"
 bot_token = "6680585225:AAEXQVe8voeIvCJ6ebzVN8cGdi4hmzKkkq4"
@@ -53,8 +53,21 @@ def link_handler(client, message):
         # Check file extension to determine whether it's a video or a document
         _, file_extension = os.path.splitext(file_name)
         if file_extension.lower() in ['.mp4', '.avi', '.mkv', '.mov']:
-            # Upload as a native video
-            message.reply_video(video=downloaded_file_path)
+            # Extract video metadata using moviepy
+            video_clip = VideoFileClip(downloaded_file_path)
+            duration = int(video_clip.duration)
+            thumbnail_path = f"{os.getcwd()}/thumbnail.jpg"
+            video_clip.save_frame(thumbnail_path, t=duration / 2)  # Save thumbnail at the middle of the video
+
+            # Upload video with metadata
+            message.reply_video(
+                video=downloaded_file_path,
+                duration=duration,
+                thumb=thumbnail_path
+            )
+
+            # Remove the temporary thumbnail file
+            os.remove(thumbnail_path)
         else:
             # Upload as a document
             message.reply_document(document=downloaded_file_path)
